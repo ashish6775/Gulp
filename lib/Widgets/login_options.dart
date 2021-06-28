@@ -227,11 +227,12 @@ class _LoginOptionsState extends State<LoginOptions> {
   // }
 
   void loginWithOtp(BuildContext ctx, String number) {
-    showModalBottomSheet(
-      isDismissible: false,
-      enableDrag: false,
-      context: ctx,
-      builder: (_) => LoginOtp(ctx, number),
+    Navigator.of(ctx).push(
+      MaterialPageRoute(
+        builder: (_) {
+          return LoginOtp(ctx, number);
+        },
+      ),
     );
   }
 

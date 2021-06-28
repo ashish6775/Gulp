@@ -171,7 +171,7 @@ class _FruitCategoryScreenState extends State<FruitCategoryScreen> {
                                     categoryDocs[index]['title'],
                                     categoryDocs[index]['url'],
                                     true,
-                                    "",
+                                    "0",
                                     categoryDocs[index]['type'],
                                     true,
                                   );

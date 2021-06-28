@@ -27,21 +27,17 @@ class _LoginOtpState extends State<LoginOtp> {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
+    return Scaffold(
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+      ),
+      body: Container(
+        width: MediaQuery.of(context).size.width * 1,
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                IconButton(
-                    icon: Icon(Icons.close),
-                    onPressed: () {
-                      Navigator.pop(context);
-                    }),
-              ],
-            ),
             Text(
               'Enter Verification Code',
               style: TextStyle(
@@ -57,18 +53,29 @@ class _LoginOtpState extends State<LoginOtp> {
                 style:
                     TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
               ),
-            Container(
-              width: MediaQuery.of(context).size.width * 0.4,
-              child: TextField(
-                textAlign: TextAlign.center,
-                decoration: InputDecoration(
-                  hintText: "Enter OTP here",
+            SizedBox(
+              height: 10,
+            ),
+            Card(
+              elevation: 4,
+              child: Container(
+                width: MediaQuery.of(context).size.width * 0.4,
+                child: TextField(
+                  textAlign: TextAlign.center,
+                  decoration: InputDecoration(
+                    border: InputBorder.none,
+                    focusedBorder: InputBorder.none,
+                    enabledBorder: InputBorder.none,
+                    errorBorder: InputBorder.none,
+                    disabledBorder: InputBorder.none,
+                    hintText: "Enter OTP here",
+                  ),
+                  inputFormatters: <TextInputFormatter>[
+                    LengthLimitingTextInputFormatter(6),
+                  ],
+                  keyboardType: TextInputType.number,
+                  controller: _codeController,
                 ),
-                inputFormatters: <TextInputFormatter>[
-                  LengthLimitingTextInputFormatter(6),
-                ],
-                keyboardType: TextInputType.number,
-                controller: _codeController,
               ),
             ),
             Padding(
@@ -135,13 +142,14 @@ class _LoginOtpState extends State<LoginOtp> {
                       },
                       child: Text(
                         "   CONFIRM OTP   ",
-                        style: TextStyle(color: Colors.white),
+                        style: TextStyle(
+                            color: Colors.white, fontWeight: FontWeight.bold),
                       ),
                       style: ButtonStyle(
                         shape:
                             MaterialStateProperty.all<RoundedRectangleBorder>(
                           RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(0),
+                            borderRadius: BorderRadius.circular(4),
                             side: BorderSide(color: Colors.orange),
                           ),
                         ),

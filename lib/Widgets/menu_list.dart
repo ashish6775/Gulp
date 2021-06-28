@@ -502,6 +502,7 @@ class _MenuListState extends State<MenuList> {
                 final price = menuData[index]['price'];
                 final priceList = price.split('_');
                 final originalHalfPlate = double.parse(priceList[0]);
+
                 final halfPlate = originalHalfPlate -
                     originalHalfPlate * double.parse(widget.offer) / 100;
 
@@ -559,17 +560,20 @@ class _MenuListState extends State<MenuList> {
                                         color: Colors.black54,
                                       ),
                                       children: <TextSpan>[
+                                        if (widget.offer != "0")
+                                          TextSpan(
+                                            text: '₹' +
+                                                originalHalfPlate
+                                                    .toStringAsFixed(0),
+                                            style: TextStyle(
+                                              decoration:
+                                                  TextDecoration.lineThrough,
+                                            ),
+                                          ),
+                                        if (widget.offer != "0")
+                                          TextSpan(text: '  '),
                                         TextSpan(
                                           text: '₹' +
-                                              originalHalfPlate
-                                                  .toStringAsFixed(0),
-                                          style: TextStyle(
-                                            decoration:
-                                                TextDecoration.lineThrough,
-                                          ),
-                                        ),
-                                        TextSpan(
-                                          text: '  ₹' +
                                               halfPlate.toStringAsFixed(0),
                                           style: TextStyle(
                                             fontSize: 10.0.sp,

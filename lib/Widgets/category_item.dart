@@ -84,7 +84,7 @@ class CategoryItem extends StatelessWidget {
                   borderRadius: BorderRadius.circular(10),
                 ),
               ),
-              if (title != "" && offer != "")
+              if (title != "" && offer != "0")
                 Positioned(
                     top: -7,
                     left: -11,
@@ -93,7 +93,7 @@ class CategoryItem extends StatelessWidget {
                       size: 50,
                       color: Colors.deepOrange,
                     )),
-              if (title != "" && offer != "")
+              if (title != "" && offer != "0")
                 Positioned(
                   top: 1,
                   left: 4,

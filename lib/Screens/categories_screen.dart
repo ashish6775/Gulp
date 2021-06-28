@@ -98,7 +98,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                       categoryDocs[index]['title'],
                       categoryDocs[index]['url'],
                       categoryDocs[index]['categoryOpen'],
-                      categoryDocs[index]['offer'],
+                      categoryDocs[index]['off'],
                       categoryDocs[index]['type'],
                       restaurantOpen);
                 },
