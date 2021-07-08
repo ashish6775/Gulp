@@ -5,8 +5,10 @@ import 'package:flutter/material.dart';
 class SlideIndicator extends AnimatedWidget {
   final PageController pageController;
   final Color selectedColor;
+  final int items;
 
-  SlideIndicator({this.selectedColor, this.pageController}) : super(listenable: pageController);
+  SlideIndicator({this.selectedColor, this.pageController, this.items})
+      : super(listenable: pageController);
 
   @override
   Widget build(BuildContext context) {
@@ -32,7 +34,7 @@ class SlideIndicator extends AnimatedWidget {
           width: 20 - decrease,
           height: 5,
           decoration: BoxDecoration(
-              color: decrease == 10.0 ? selectedColor: selectedColor,
+              color: decrease == 10.0 ? selectedColor : selectedColor,
               borderRadius: BorderRadius.circular(10)),
         ),
       ),

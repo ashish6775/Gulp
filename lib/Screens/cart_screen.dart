@@ -33,6 +33,7 @@ class _CartScreenState extends State<CartScreen> {
   DateTime deliveryBy;
   Orders order;
   Stream<QuerySnapshot> stream;
+  Stream<DocumentSnapshot> stream1;
 
   double tip = 0.0;
   String request = 'None';
@@ -44,10 +45,25 @@ class _CartScreenState extends State<CartScreen> {
   var selectedTwenty = false;
   var selectedThirty = false;
   int packaging = 5;
+  double wallet = 0;
 
   @override
   void initState() {
     super.initState();
+
+    FirebaseFirestore.instance
+        .collection('users')
+        .doc(_auth.currentUser.uid)
+        .get()
+        .then((DocumentSnapshot ds) {
+      wallet = ds['wallet'].toDouble();
+    }).whenComplete(() {
+      setState(() {});
+    }).onError((error, stackTrace) {
+      setState(() {
+        wallet = 0;
+      });
+    });
     stream = FirebaseFirestore.instance
         .collection('users')
         .doc(_auth.currentUser.uid)
@@ -759,7 +775,42 @@ class _CartScreenState extends State<CartScreen> {
                                 ),
                               ),
                               Divider(),
+                              Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      'Net Payable',
+                                    ),
+                                    Text(
+                                      '₹${(cart.totalAmount + packaging + tip).toStringAsFixed(1)}',
+                                    ),
+                                  ],
+                                ),
+                              ),
 
+                              Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      'Wallet Balance',
+                                    ),
+                                    wallet >
+                                            (cart.totalAmount + packaging + tip)
+                                        ? Text(
+                                            '-₹${(cart.totalAmount + packaging + tip).toStringAsFixed(1)}',
+                                          )
+                                        : Text(
+                                            '-₹' + wallet.toStringAsFixed(1),
+                                          ),
+                                  ],
+                                ),
+                              ),
                               // Padding(
                               //   padding: const EdgeInsets.all(8.0),
                               //   child: Row(
@@ -789,7 +840,12 @@ class _CartScreenState extends State<CartScreen> {
                                     ),
                                     Chip(
                                       label: Text(
-                                        '₹${(cart.totalAmount + packaging + tip).toStringAsFixed(1)}',
+                                        wallet >
+                                                (cart.totalAmount +
+                                                    packaging +
+                                                    tip)
+                                            ? '₹0.0'
+                                            : '₹${(cart.totalAmount + packaging + tip - wallet).toStringAsFixed(1)}',
                                         style: TextStyle(
                                           color: Colors.white,
                                           fontWeight: FontWeight.bold,
@@ -1011,6 +1067,17 @@ class _CartScreenState extends State<CartScreen> {
       }
     }
 
+    double finalAmount;
+    double fromWallet;
+
+    if (wallet > (cart.totalAmount + packaging + tip)) {
+      finalAmount = 0;
+      fromWallet = cart.totalAmount + packaging + tip;
+    } else {
+      finalAmount = cart.totalAmount + packaging + tip - wallet;
+      fromWallet = wallet;
+    }
+
     if (cod) {
       setState(() {
         loading = true;
@@ -1018,12 +1085,21 @@ class _CartScreenState extends State<CartScreen> {
       CollectionReference db = FirebaseFirestore.instance.collection('orders');
       String orderId = db.doc().id;
 
-      await db.doc(orderId).set({
+      WriteBatch writeBatch = FirebaseFirestore.instance.batch();
+
+      writeBatch.set(
+          FirebaseFirestore.instance
+              .collection('users')
+              .doc(_auth.currentUser.uid),
+          {'wallet': wallet - fromWallet});
+
+      writeBatch.set(db.doc(orderId), {
         'userId': _auth.currentUser.uid,
         'name': _auth.currentUser.displayName,
         'orderId': orderId,
         'dateTime': DateTime.now(),
-        'amount': (cart.totalAmount + packaging + tip).toDouble(),
+        'amount': finalAmount,
+        'fromWallet': fromWallet,
         'request': request,
         'payment': 'Cash on Delivery',
         'tip': tip.toDouble(),
@@ -1035,39 +1111,47 @@ class _CartScreenState extends State<CartScreen> {
         'deliveryBy': deliveryBy,
         'cart': cartName,
         'items': items,
-      }).whenComplete(() {
-        if (cartName == "Essentials") {
-          cart.items.forEach((prod) {
+      });
+
+      if (cartName == "Essentials") {
+        cart.items.forEach((prod) {
+          writeBatch.set(
+              FirebaseFirestore.instance
+                  .collection('Branches')
+                  .doc('Branch1')
+                  .collection('orders')
+                  .doc(docId),
+              {
+                prod.title: FieldValue.increment(prod.quantity),
+              },
+              SetOptions(merge: true));
+        });
+        writeBatch.set(
             FirebaseFirestore.instance
                 .collection('Branches')
                 .doc('Branch1')
                 .collection('orders')
-                .doc(docId)
-                .set({
-              prod.title: FieldValue.increment(prod.quantity),
-            }, SetOptions(merge: true));
-          });
-          FirebaseFirestore.instance
-              .collection('Branches')
-              .doc('Branch1')
-              .collection('orders')
-              .doc(docId)
-              .set({
-            'EssentialRevenue':
-                FieldValue.increment(cart.totalAmount + packaging + tip),
-          }, SetOptions(merge: true));
-        } else if (cartName == "Food") {
-          FirebaseFirestore.instance
-              .collection('Branches')
-              .doc('Branch1')
-              .collection('orders')
-              .doc(docId)
-              .set({
-            'RestaurantRevenue':
-                FieldValue.increment(cart.totalAmount + packaging + tip),
-          }, SetOptions(merge: true));
-        }
-      });
+                .doc(docId),
+            {
+              'EssentialRevenue':
+                  FieldValue.increment(cart.totalAmount + packaging + tip),
+            },
+            SetOptions(merge: true));
+      } else if (cartName == "Food") {
+        writeBatch.set(
+            FirebaseFirestore.instance
+                .collection('Branches')
+                .doc('Branch1')
+                .collection('orders')
+                .doc(docId),
+            {
+              'RestaurantRevenue':
+                  FieldValue.increment(cart.totalAmount + packaging + tip),
+            },
+            SetOptions(merge: true));
+      }
+
+      writeBatch.commit();
 
       cart.clear();
       Navigator.of(context).pop();
@@ -1076,10 +1160,9 @@ class _CartScreenState extends State<CartScreen> {
         //result = value.toString();
       });
     } else {
-      var grandTotal = cart.totalAmount + packaging + tip;
       var paymentBody = {
         "orderId": orderId,
-        "value": grandTotal.toString(),
+        "value": finalAmount.toString(),
         "custId": _auth.currentUser.uid,
       };
 
@@ -1096,14 +1179,23 @@ class _CartScreenState extends State<CartScreen> {
         });
 
         var response = AllInOneSdk.startTransaction("KGeIop74079861754179",
-            orderId, grandTotal.toString(), txnToken, null, false, false);
+            orderId, finalAmount.toString(), txnToken, null, false, false);
         response.then((value) async {
-          await db.doc(orderId).set({
+          WriteBatch writeBatch = FirebaseFirestore.instance.batch();
+
+          writeBatch.set(
+              FirebaseFirestore.instance
+                  .collection('users')
+                  .doc(_auth.currentUser.uid),
+              {'wallet': wallet - fromWallet});
+
+          writeBatch.set(db.doc(orderId), {
             'userId': _auth.currentUser.uid,
             'name': _auth.currentUser.displayName,
             'orderId': orderId,
             'dateTime': DateTime.now(),
-            'amount': (cart.totalAmount + packaging + tip).toDouble(),
+            'amount': finalAmount,
+            'fromWallet': fromWallet,
             'request': request,
             'tip': tip.toDouble(),
             'packaging': packaging.toDouble(),
@@ -1117,39 +1209,47 @@ class _CartScreenState extends State<CartScreen> {
             'deliveryBy': deliveryBy,
             'cart': cartName,
             'items': items,
-          }).whenComplete(() {
-            if (cartName == "Essentials") {
-              cart.items.forEach((prod) {
+          });
+
+          if (cartName == "Essentials") {
+            cart.items.forEach((prod) {
+              writeBatch.set(
+                  FirebaseFirestore.instance
+                      .collection('Branches')
+                      .doc('Branch1')
+                      .collection('orders')
+                      .doc(docId),
+                  {
+                    prod.title: FieldValue.increment(prod.quantity),
+                  },
+                  SetOptions(merge: true));
+            });
+            writeBatch.set(
                 FirebaseFirestore.instance
                     .collection('Branches')
                     .doc('Branch1')
                     .collection('orders')
-                    .doc(docId)
-                    .set({
-                  prod.title: FieldValue.increment(prod.quantity),
-                }, SetOptions(merge: true));
-              });
-              FirebaseFirestore.instance
-                  .collection('Branches')
-                  .doc('Branch1')
-                  .collection('orders')
-                  .doc(docId)
-                  .set({
-                'EssentialRevenue':
-                    FieldValue.increment(cart.totalAmount + packaging + tip),
-              }, SetOptions(merge: true));
-            } else if (cartName == "Food") {
-              FirebaseFirestore.instance
-                  .collection('Branches')
-                  .doc('Branch1')
-                  .collection('orders')
-                  .doc(docId)
-                  .set({
-                'RestaurantRevenue':
-                    FieldValue.increment(cart.totalAmount + packaging + tip),
-              }, SetOptions(merge: true));
-            }
-          });
+                    .doc(docId),
+                {
+                  'EssentialRevenue':
+                      FieldValue.increment(cart.totalAmount + packaging + tip),
+                },
+                SetOptions(merge: true));
+          } else if (cartName == "Food") {
+            writeBatch.set(
+                FirebaseFirestore.instance
+                    .collection('Branches')
+                    .doc('Branch1')
+                    .collection('orders')
+                    .doc(docId),
+                {
+                  'RestaurantRevenue':
+                      FieldValue.increment(cart.totalAmount + packaging + tip),
+                },
+                SetOptions(merge: true));
+          }
+
+          writeBatch.commit();
 
           cart.clear();
           Navigator.of(context).pop();

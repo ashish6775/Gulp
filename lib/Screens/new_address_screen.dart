@@ -113,12 +113,12 @@ class _NewAddressScreenState extends State<NewAddressScreen> {
   Future<void> _trySubmit() async {
     final isValid = _formKey.currentState.validate();
     FocusScope.of(context).unfocus();
-    setState(() {
-      loading = true;
-    });
 
     if (isValid) {
       _formKey.currentState.save();
+      setState(() {
+        loading = true;
+      });
       String address = _flat + " " + _landmark;
 
       await FirebaseFirestore.instance

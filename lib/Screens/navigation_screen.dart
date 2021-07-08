@@ -11,6 +11,7 @@ import 'package:shop_app/Providers/cart.dart';
 import 'package:shop_app/Screens/cart_screen.dart';
 import 'package:shop_app/Screens/categories_screen.dart';
 import 'package:shop_app/Screens/fruits_category_screen.dart';
+import 'package:shop_app/Screens/my_wallet_screen.dart';
 
 import 'package:shop_app/Screens/privacy_policy.dart';
 import 'package:shop_app/Widgets/badge.dart';
@@ -445,6 +446,16 @@ class _NavigationScreenState extends State<NavigationScreen> {
     );
   }
 
+  void _myWalletScreen(BuildContext ctx) {
+    Navigator.of(ctx).push(
+      MaterialPageRoute(
+        builder: (_) {
+          return MyWalletScreen();
+        },
+      ),
+    );
+  }
+
   void deliveryPolicy(BuildContext ctx) {
     Navigator.of(ctx).push(
       MaterialPageRoute(
@@ -570,6 +581,29 @@ class _NavigationScreenState extends State<NavigationScreen> {
                         ),
             ),
             Divider(),
+            ListTile(
+              onTap: () {
+                Navigator.of(context).pop();
+                _myWalletScreen(context);
+              },
+              leading: Icon(
+                Icons.account_balance_wallet_outlined,
+                color: switchButton ? Colors.lightGreen : Colors.orange,
+              ),
+              title: Text(
+                'My Wallet',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              subtitle: Text(
+                'Manage all your transactions',
+                style: TextStyle(
+                  color: Colors.grey,
+                  fontSize: 10,
+                ),
+              ),
+            ),
             ListTile(
               onTap: () {
                 Navigator.of(context).pop();

@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
 class AddSlideCard2 extends StatelessWidget {
@@ -8,7 +9,7 @@ class AddSlideCard2 extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(8,0,8,8),
+      padding: const EdgeInsets.fromLTRB(8, 0, 8, 8),
       child: Card(
         elevation: 4,
         shape: RoundedRectangleBorder(
@@ -18,8 +19,8 @@ class AddSlideCard2 extends StatelessWidget {
           height: MediaQuery.of(context).size.height * 0.4,
           child: ClipRRect(
             borderRadius: BorderRadius.circular(10),
-            child: Image.asset(
-              slideImage,
+            child: CachedNetworkImage(
+              imageUrl: slideImage,
               fit: BoxFit.cover,
             ),
           ),
