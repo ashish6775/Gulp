@@ -1078,7 +1078,7 @@ class _CartScreenState extends State<CartScreen> {
       fromWallet = wallet;
     }
 
-    if (cod) {
+    if (cod || finalAmount == 0) {
       setState(() {
         loading = true;
       });
@@ -1091,14 +1091,34 @@ class _CartScreenState extends State<CartScreen> {
           FirebaseFirestore.instance
               .collection('users')
               .doc(_auth.currentUser.uid),
-          {'wallet': wallet - fromWallet});
+          {'wallet': wallet - fromWallet},
+          SetOptions(merge: true));
+
+      if (wallet != 0) {
+        writeBatch.set(
+            FirebaseFirestore.instance
+                .collection('users')
+                .doc(_auth.currentUser.uid)
+                .collection('wallet')
+                .doc(),
+            {
+              'dateTime': DateTime.now(),
+              'amountAdded': 0,
+              'amountUsed': fromWallet,
+              'note': '₹' +
+                  fromWallet.toStringAsFixed(0) +
+                  " used against order #${orderId.toString().substring(0, 6).toUpperCase()}",
+              'cashback': 0,
+              'balance': wallet - fromWallet,
+            });
+      }
 
       writeBatch.set(db.doc(orderId), {
         'userId': _auth.currentUser.uid,
         'name': _auth.currentUser.displayName,
         'orderId': orderId,
         'dateTime': DateTime.now(),
-        'amount': finalAmount,
+        'amount': cart.totalAmount + packaging + tip,
         'fromWallet': fromWallet,
         'request': request,
         'payment': 'Cash on Delivery',
@@ -1166,6 +1186,8 @@ class _CartScreenState extends State<CartScreen> {
         "custId": _auth.currentUser.uid,
       };
 
+      print(finalAmount.toString());
+
       http
           .post(
         Uri.parse(
@@ -1187,14 +1209,34 @@ class _CartScreenState extends State<CartScreen> {
               FirebaseFirestore.instance
                   .collection('users')
                   .doc(_auth.currentUser.uid),
-              {'wallet': wallet - fromWallet});
+              {'wallet': wallet - fromWallet},
+              SetOptions(merge: true));
+
+          if (wallet != 0) {
+            writeBatch.set(
+                FirebaseFirestore.instance
+                    .collection('users')
+                    .doc(_auth.currentUser.uid)
+                    .collection('wallet')
+                    .doc(),
+                {
+                  'dateTime': DateTime.now(),
+                  'amountAdded': 0,
+                  'amountUsed': fromWallet,
+                  'note': '₹' +
+                      fromWallet.toStringAsFixed(0) +
+                      " used against order #${orderId.toString().substring(0, 6).toUpperCase()}",
+                  'cashback': 0,
+                  'balance': wallet - fromWallet,
+                });
+          }
 
           writeBatch.set(db.doc(orderId), {
             'userId': _auth.currentUser.uid,
             'name': _auth.currentUser.displayName,
             'orderId': orderId,
             'dateTime': DateTime.now(),
-            'amount': finalAmount,
+            'amount': cart.totalAmount + packaging + tip,
             'fromWallet': fromWallet,
             'request': request,
             'tip': tip.toDouble(),

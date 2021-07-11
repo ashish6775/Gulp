@@ -3,16 +3,17 @@ import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class SingleOrderScreen extends StatelessWidget {
-  final double amount;
+  final dynamic amount;
   final DateTime dateTime;
   final DateTime deliveryBy;
   final String address;
-  final double tip;
-  final double packaging;
+  final dynamic tip;
+  final dynamic packaging;
   final String payment;
   final String orderId;
   final String status;
   final List items;
+  final dynamic wallet;
 
   SingleOrderScreen(
       this.amount,
@@ -24,7 +25,8 @@ class SingleOrderScreen extends StatelessWidget {
       this.payment,
       this.orderId,
       this.status,
-      this.items);
+      this.items,
+      this.wallet);
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -183,6 +185,22 @@ class SingleOrderScreen extends StatelessWidget {
                           ],
                         ),
                         SizedBox(
+                          height: 5,
+                        ),
+                        Row(
+                          children: [
+                            Text(
+                              'Wallet',
+                              style: TextStyle(color: Colors.grey),
+                            ),
+                            Spacer(),
+                            Text(
+                              '-₹$wallet',
+                              style: TextStyle(color: Colors.grey),
+                            ),
+                          ],
+                        ),
+                        SizedBox(
                           height: 10,
                         ),
                         Row(
@@ -193,7 +211,7 @@ class SingleOrderScreen extends StatelessWidget {
                             ),
                             Spacer(),
                             Text(
-                              '₹$amount',
+                              '₹${amount - wallet}',
                               style: TextStyle(fontWeight: FontWeight.bold),
                             ),
                           ],

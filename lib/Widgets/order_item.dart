@@ -41,12 +41,12 @@ class _OrderItemState extends State<OrderItem> {
   }
 
   void singleOrderScreen(BuildContext ctx, amount, dateTime, deliveryBy,
-      address, tip, packaging, payment, orderId, status, items) {
+      address, tip, packaging, payment, orderId, status, items, wallet) {
     Navigator.of(ctx).push(
       MaterialPageRoute(
         builder: (_) {
           return SingleOrderScreen(amount, dateTime, deliveryBy, address, tip,
-              packaging, payment, orderId, status, items);
+              packaging, payment, orderId, status, items, wallet);
         },
       ),
     );
@@ -54,18 +54,24 @@ class _OrderItemState extends State<OrderItem> {
 
   @override
   Widget build(BuildContext context) {
-    final double amount = widget.orderData[widget.index]['amount'];
+    final dynamic amount = widget.orderData[widget.index]['amount'];
     final DateTime dateTime =
         widget.orderData[widget.index]['dateTime'].toDate();
     final DateTime deliveryBy =
         widget.orderData[widget.index]['deliveryBy'].toDate();
     final String address = widget.orderData[widget.index]['address'];
-    final double tip = widget.orderData[widget.index]['tip'];
-    final double packaging = widget.orderData[widget.index]['packaging'];
+    final dynamic tip = widget.orderData[widget.index]['tip'];
+    final dynamic packaging = widget.orderData[widget.index]['packaging'];
     final String payment = widget.orderData[widget.index]['payment'];
     final String orderId = widget.orderData[widget.index]['orderId'];
     final String status = widget.orderData[widget.index]['status'];
     final List items = List.from(widget.orderData[widget.index]['items']);
+    dynamic wallet = 0;
+    try {
+      wallet = widget.orderData[widget.index]['fromWallet'];
+    } catch (e) {
+      wallet = 0;
+    }
 
     difference = DateTime.now().difference(dateTime).inSeconds;
 
@@ -135,8 +141,8 @@ class _OrderItemState extends State<OrderItem> {
                           Spacer(),
                           Text(
                             items.length > 1
-                                ? '₹$amount | ${items.length} Items'
-                                : '₹$amount | ${items.length} Item',
+                                ? '₹${amount - wallet} | ${items.length} Items'
+                                : '₹${amount - wallet} | ${items.length} Item',
                             style: TextStyle(
                               color: Colors.grey[600],
                             ),
@@ -178,7 +184,8 @@ class _OrderItemState extends State<OrderItem> {
                           payment,
                           orderId,
                           status,
-                          items);
+                          items,
+                          wallet);
                     },
                     splashColor: Colors.green[100],
                     borderRadius: BorderRadius.circular(5),

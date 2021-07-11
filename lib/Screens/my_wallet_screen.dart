@@ -389,6 +389,7 @@ class _MyWalletScreenState extends State<MyWalletScreen> {
                                                         amountUsed
                                                             .toStringAsFixed(0),
                                                     style: TextStyle(
+                                                        fontSize: 12,
                                                         color: Colors.red,
                                                         fontWeight:
                                                             FontWeight.bold),
@@ -398,6 +399,7 @@ class _MyWalletScreenState extends State<MyWalletScreen> {
                                                         amountAdded
                                                             .toStringAsFixed(0),
                                                     style: TextStyle(
+                                                        fontSize: 12,
                                                         color:
                                                             Colors.lightGreen,
                                                         fontWeight:
@@ -411,9 +413,15 @@ class _MyWalletScreenState extends State<MyWalletScreen> {
                                             ),
                                             cashbackRec == 0
                                                 ? Container()
-                                                : Text(cashbackRec
-                                                        .toStringAsFixed(0) +
-                                                    'recieved as cashback'),
+                                                : Text(
+                                                    "₹" +
+                                                        cashbackRec
+                                                            .toStringAsFixed(
+                                                                0) +
+                                                        'recieved as cashback',
+                                                    style: TextStyle(
+                                                        color: Colors.grey,
+                                                        fontSize: 12)),
                                           ],
                                         ),
                                         Text(

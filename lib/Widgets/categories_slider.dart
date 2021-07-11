@@ -20,12 +20,19 @@ class CategoriesSlider extends StatefulWidget {
 class _CategoriesSliderState extends State<CategoriesSlider> {
   CarouselController _controller = CarouselController();
   int _current = 0;
+  int pagecount = 0;
 
   Stream<QuerySnapshot> stream;
 
   @override
   void initState() {
     super.initState();
+
+    FirebaseFirestore.instance.collection('adds').get().then((value) {
+      setState(() {
+        pagecount = value.size;
+      });
+    });
 
     // Timer.periodic(Duration(seconds: 5), (timer) {
     //   if (!pageController.hasClients) {
@@ -41,7 +48,10 @@ class _CategoriesSliderState extends State<CategoriesSlider> {
     //         curve: Curves.fastLinearToSlowEaseIn);
     //   }
     // });
-    stream = FirebaseFirestore.instance.collection('adds').snapshots();
+    stream = FirebaseFirestore.instance
+        .collection('adds')
+        .orderBy('rank', descending: false)
+        .snapshots();
   }
 
   @override
@@ -110,7 +120,7 @@ class _CategoriesSliderState extends State<CategoriesSlider> {
         ),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: List<Widget>.generate(3, buildIndicator),
+          children: List<Widget>.generate(pagecount, buildIndicator),
         ),
       ],
     );
