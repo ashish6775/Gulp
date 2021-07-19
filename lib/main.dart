@@ -5,6 +5,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:shop_app/Providers/cart.dart';
 import 'package:shop_app/Providers/orders.dart';
+import 'package:shop_app/Screens/berfore_signup.dart';
 import 'package:shop_app/Screens/navigation_screen.dart';
 import 'package:shop_app/Widgets/login_options.dart';
 import 'package:shop_app/Widgets/login_slider.dart';
@@ -94,6 +95,12 @@ class _MyAppState extends State<MyApp> {
                       return SplashScreen();
                     }
                     if (userSnapshot.hasData) {
+                      if (FirebaseAuth.instance.currentUser.displayName ==
+                              null ||
+                          FirebaseAuth.instance.currentUser.displayName == "") {
+                        return BeforeSignup();
+                      }
+
                       return NavigationScreen();
                     }
                     return LoginPage();

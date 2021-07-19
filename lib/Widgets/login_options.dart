@@ -70,12 +70,6 @@ class _LoginOptionsState extends State<LoginOptions> {
     await listener.cancel();
   }
 
-  @override
-  void dispose() {
-    listener.cancel();
-    super.dispose();
-  }
-
   Future<void> _trySubmit() async {
     final isValid = _formKey.currentState.validate();
     FocusScope.of(context).unfocus();
@@ -454,6 +448,7 @@ class _LoginOptionsState extends State<LoginOptions> {
                         },
                         inputFormatters: <TextInputFormatter>[
                           LengthLimitingTextInputFormatter(10),
+                          FilteringTextInputFormatter.digitsOnly,
                         ],
                         keyboardType: TextInputType.number,
                         decoration: InputDecoration(

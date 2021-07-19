@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:shop_app/Screens/berfore_signup.dart';
 
 class LoginOtp extends StatefulWidget {
   final String phone;
@@ -93,7 +94,7 @@ class _LoginOtpState extends State<LoginOtp> {
                         setState(() {
                           loading = true;
                         });
-                        await _auth
+                        UserCredential userCredential = await _auth
                             .signInWithCredential(PhoneAuthProvider.credential(
                                 verificationId: _verificationCode,
                                 smsCode: _codeController.text.trim()))
@@ -104,40 +105,42 @@ class _LoginOtpState extends State<LoginOtp> {
                           });
                           return error1;
                         });
-
-                        try {
+                        if (userCredential.additionalUserInfo.isNewUser) {
                           Navigator.of(context).pop();
-
-                          FirebaseFirestore.instance
-                              .collection('users')
-                              .doc(_auth.currentUser.uid)
-                              .set({
-                            'phone': widget.phone,
-                            'name': _auth.currentUser.displayName == null
-                                ? "Stranger"
-                                : _auth.currentUser.displayName,
-                          }, SetOptions(merge: true));
-                          if (_auth.currentUser.displayName == null) {
-                            _auth.currentUser.updateDisplayName("Stranger");
+                        } else {
+                          try {
+                            Navigator.of(context).pop();
+                            FirebaseFirestore.instance
+                                .collection('users')
+                                .doc(_auth.currentUser.uid)
+                                .set({
+                              'phone': widget.phone,
+                              'name': _auth.currentUser.displayName == null
+                                  ? "Stranger"
+                                  : _auth.currentUser.displayName,
+                            }, SetOptions(merge: true));
+                            if (_auth.currentUser.displayName == null) {
+                              _auth.currentUser.updateDisplayName("Stranger");
+                            }
+                          } on PlatformException catch (err) {
+                            var message =
+                                'An error occurred, please check your credentials!';
+                            if (err.message != null) {
+                              message = err.message;
+                            }
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(message),
+                                backgroundColor: Colors.red,
+                              ),
+                            );
+                          } catch (err) {
+                            setState(() {
+                              error = true;
+                              loading = false;
+                            });
+                            print(err);
                           }
-                        } on PlatformException catch (err) {
-                          var message =
-                              'An error occurred, please check your credentials!';
-                          if (err.message != null) {
-                            message = err.message;
-                          }
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(message),
-                              backgroundColor: Colors.red,
-                            ),
-                          );
-                        } catch (err) {
-                          setState(() {
-                            error = true;
-                            loading = false;
-                          });
-                          print(err);
                         }
                       },
                       child: Text(
@@ -170,35 +173,41 @@ class _LoginOtpState extends State<LoginOtp> {
       phoneNumber: '+91${widget.phone}',
       timeout: Duration(seconds: 60),
       verificationCompleted: (AuthCredential credential) async {
-        await _auth.signInWithCredential(credential);
-        try {
+        UserCredential userCredential =
+            await _auth.signInWithCredential(credential);
+        if (userCredential.additionalUserInfo.isNewUser) {
           Navigator.of(context).pop();
-
-          await FirebaseFirestore.instance
-              .collection('users')
-              .doc(_auth.currentUser.uid)
-              .set({
-            'phone': widget.phone,
-            'name': _auth.currentUser.displayName == null
-                ? "Stranger"
-                : _auth.currentUser.displayName,
-          }, SetOptions(merge: true));
-          if (_auth.currentUser.displayName == null) {
-            _auth.currentUser.updateDisplayName("Stranger");
+        } else {
+          try {
+            Navigator.of(context).pop();
+            await FirebaseFirestore.instance
+                .collection('users')
+                .doc(_auth.currentUser.uid)
+                .set({
+              'phone': widget.phone,
+              'name': _auth.currentUser.displayName == null ||
+                      _auth.currentUser.displayName == ""
+                  ? "Stranger"
+                  : _auth.currentUser.displayName,
+            }, SetOptions(merge: true));
+            if (_auth.currentUser.displayName == null ||
+                _auth.currentUser.displayName == "") {
+              _auth.currentUser.updateDisplayName("Stranger");
+            }
+          } on PlatformException catch (err) {
+            var message = 'An error occurred, please check your credentials!';
+            if (err.message != null) {
+              message = err.message;
+            }
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(message),
+                backgroundColor: Colors.red,
+              ),
+            );
+          } catch (err) {
+            print(err);
           }
-        } on PlatformException catch (err) {
-          var message = 'An error occurred, please check your credentials!';
-          if (err.message != null) {
-            message = err.message;
-          }
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(message),
-              backgroundColor: Colors.red,
-            ),
-          );
-        } catch (err) {
-          print(err);
         }
       },
       verificationFailed: (FirebaseAuthException e) {

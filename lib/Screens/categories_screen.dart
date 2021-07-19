@@ -22,9 +22,11 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
   // Platform messages are asynchronous, so we initialize in an async method.
   Future<void> checkForUpdate() async {
     InAppUpdate.checkForUpdate().then((info) {
-      setState(() {
-        _updateInfo = info;
-      });
+      if (info != null) {
+        setState(() {
+          _updateInfo = info;
+        });
+      }
     }).catchError((e) {
       showSnack(e.toString());
     });
@@ -43,17 +45,6 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
 
     checkForUpdate();
 
-    stream = FirebaseFirestore.instance
-        .collection('Branches')
-        .doc('Branch1')
-        .collection('categories')
-        .where("type", isEqualTo: "Restaurant")
-        .snapshots();
-    checkForUpdate();
-  }
-
-  @override
-  Widget build(BuildContext context) {
     FirebaseFirestore.instance
         .collection('Branches')
         .doc('Branch1')
@@ -63,6 +54,17 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
         restaurantOpen = value['open'];
       });
     });
+
+    stream = FirebaseFirestore.instance
+        .collection('Branches')
+        .doc('Branch1')
+        .collection('categories')
+        .where("type", isEqualTo: "Restaurant")
+        .snapshots();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
       body: Stack(

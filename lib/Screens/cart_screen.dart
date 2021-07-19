@@ -46,6 +46,8 @@ class _CartScreenState extends State<CartScreen> {
   var selectedThirty = false;
   int packaging = 5;
   double wallet = 0;
+  String referredBy = "";
+  double orders = 0;
 
   @override
   void initState() {
@@ -57,11 +59,15 @@ class _CartScreenState extends State<CartScreen> {
         .get()
         .then((DocumentSnapshot ds) {
       wallet = ds['wallet'].toDouble();
+      referredBy = ds['referredBy'];
+      orders = ds['orders'].toDouble();
     }).whenComplete(() {
       setState(() {});
     }).onError((error, stackTrace) {
       setState(() {
         wallet = 0;
+        referredBy = "";
+        orders = -1;
       });
     });
     stream = FirebaseFirestore.instance
@@ -290,18 +296,12 @@ class _CartScreenState extends State<CartScreen> {
       backgroundColor: Colors.white,
       appBar: loading == false
           ? AppBar(
+              iconTheme: IconThemeData(
+                color: Colors.black,
+              ),
               title: Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(0, 0, 8, 0),
-                    child: Icon(
-                      Icons.location_on_outlined,
-                      color: cartName == "Essentials"
-                          ? Colors.green
-                          : Colors.deepOrange,
-                    ),
-                  ),
                   Text(
                     'Deliver at ',
                     style: TextStyle(
@@ -343,7 +343,6 @@ class _CartScreenState extends State<CartScreen> {
               ),
               backgroundColor: Colors.white,
               elevation: 1,
-              automaticallyImplyLeading: false,
             )
           : null,
       body: loading == false
@@ -1091,8 +1090,47 @@ class _CartScreenState extends State<CartScreen> {
           FirebaseFirestore.instance
               .collection('users')
               .doc(_auth.currentUser.uid),
-          {'wallet': wallet - fromWallet},
+          {'wallet': wallet - fromWallet, 'orders': FieldValue.increment(1)},
           SetOptions(merge: true));
+
+      if ((orders == 0 || orders == 1) &&
+          referredBy != "" &&
+          referredBy != null) {
+        await FirebaseFirestore.instance
+            .collection('users')
+            .where("phone", isEqualTo: referredBy)
+            .limit(1)
+            .get()
+            .then((event) {
+          if (event.docs.isNotEmpty) {
+            Map<String, dynamic> documentData = event.docs.first.data();
+            dynamic prevWallet = documentData['wallet'];
+            writeBatch.set(
+                FirebaseFirestore.instance
+                    .collection('users')
+                    .doc(event.docs.first.id),
+                {
+                  'wallet': FieldValue.increment(25),
+                },
+                SetOptions(merge: true));
+            writeBatch.set(
+                FirebaseFirestore.instance
+                    .collection('users')
+                    .doc(event.docs.first.id)
+                    .collection('wallet')
+                    .doc(),
+                {
+                  'dateTime': DateTime.now(),
+                  'amountAdded': 25,
+                  'amountUsed': 0,
+                  'note': '₹25 recieved from referral',
+                  'cashback': 0,
+                  'balance': prevWallet + 25,
+                },
+                SetOptions(merge: true));
+          }
+        });
+      }
 
       if (wallet != 0) {
         writeBatch.set(
@@ -1209,8 +1247,50 @@ class _CartScreenState extends State<CartScreen> {
               FirebaseFirestore.instance
                   .collection('users')
                   .doc(_auth.currentUser.uid),
-              {'wallet': wallet - fromWallet},
+              {
+                'wallet': wallet - fromWallet,
+                'orders': FieldValue.increment(1)
+              },
               SetOptions(merge: true));
+
+          if ((orders == 0 || orders == 1) &&
+              referredBy != "" &&
+              referredBy != null) {
+            await FirebaseFirestore.instance
+                .collection('users')
+                .where("phone", isEqualTo: referredBy)
+                .limit(1)
+                .get()
+                .then((event) {
+              if (event.docs.isNotEmpty) {
+                Map<String, dynamic> documentData = event.docs.first.data();
+                dynamic prevWallet = documentData['wallet'];
+                writeBatch.set(
+                    FirebaseFirestore.instance
+                        .collection('users')
+                        .doc(event.docs.first.id),
+                    {
+                      'wallet': FieldValue.increment(25),
+                    },
+                    SetOptions(merge: true));
+                writeBatch.set(
+                    FirebaseFirestore.instance
+                        .collection('users')
+                        .doc(event.docs.first.id)
+                        .collection('wallet')
+                        .doc(),
+                    {
+                      'dateTime': DateTime.now(),
+                      'amountAdded': 25,
+                      'amountUsed': 0,
+                      'note': '₹25 recieved from referral',
+                      'cashback': 0,
+                      'balance': prevWallet + 25,
+                    },
+                    SetOptions(merge: true));
+              }
+            });
+          }
 
           if (wallet != 0) {
             writeBatch.set(

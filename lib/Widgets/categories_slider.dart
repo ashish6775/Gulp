@@ -4,10 +4,6 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
-import 'package:provider/provider.dart';
-
-import '../slide_indicator.dart';
-import 'add_slide_card2.dart';
 
 class CategoriesSlider extends StatefulWidget {
   final Color color;
@@ -28,9 +24,13 @@ class _CategoriesSliderState extends State<CategoriesSlider> {
   void initState() {
     super.initState();
 
-    FirebaseFirestore.instance.collection('adds').get().then((value) {
+    FirebaseFirestore.instance
+        .collection('adds')
+        .doc('branch1')
+        .get()
+        .then((value) {
       setState(() {
-        pagecount = value.size;
+        pagecount = value['count'];
       });
     });
 
@@ -50,6 +50,8 @@ class _CategoriesSliderState extends State<CategoriesSlider> {
     // });
     stream = FirebaseFirestore.instance
         .collection('adds')
+        .doc('branch1')
+        .collection('adds')
         .orderBy('rank', descending: false)
         .snapshots();
   }
@@ -64,7 +66,6 @@ class _CategoriesSliderState extends State<CategoriesSlider> {
     return Column(
       children: [
         LimitedBox(
-          maxHeight: 200,
           child: StreamBuilder(
               stream: stream,
               builder: (context, addSnapshot) {
@@ -72,7 +73,6 @@ class _CategoriesSliderState extends State<CategoriesSlider> {
                   return Container();
                 }
                 final addItems = addSnapshot.data.docs;
-                int pagecount = addItems.length;
                 return CarouselSlider.builder(
                   carouselController: _controller,
                   options: CarouselOptions(
@@ -81,7 +81,6 @@ class _CategoriesSliderState extends State<CategoriesSlider> {
                         _current = index;
                       });
                     },
-                    height: MediaQuery.of(context).size.height * 0.4,
                     viewportFraction: 0.95,
                     initialPage: 0,
                     enableInfiniteScroll: true,

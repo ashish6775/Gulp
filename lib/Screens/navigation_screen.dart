@@ -8,12 +8,14 @@ import 'package:package_info/package_info.dart';
 import 'package:provider/provider.dart';
 
 import 'package:shop_app/Providers/cart.dart';
+import 'package:shop_app/Screens/berfore_signup.dart';
 import 'package:shop_app/Screens/cart_screen.dart';
 import 'package:shop_app/Screens/categories_screen.dart';
 import 'package:shop_app/Screens/fruits_category_screen.dart';
 import 'package:shop_app/Screens/my_wallet_screen.dart';
 
 import 'package:shop_app/Screens/privacy_policy.dart';
+import 'package:shop_app/Screens/share_screen.dart';
 import 'package:shop_app/Widgets/badge.dart';
 import 'dart:math' show cos, sqrt, asin;
 
@@ -456,6 +458,16 @@ class _NavigationScreenState extends State<NavigationScreen> {
     );
   }
 
+  void _shareScreen(BuildContext ctx) {
+    Navigator.of(ctx).push(
+      MaterialPageRoute(
+        builder: (_) {
+          return ShareScreen();
+        },
+      ),
+    );
+  }
+
   void deliveryPolicy(BuildContext ctx) {
     Navigator.of(ctx).push(
       MaterialPageRoute(
@@ -581,6 +593,29 @@ class _NavigationScreenState extends State<NavigationScreen> {
                         ),
             ),
             Divider(),
+            ListTile(
+              onTap: () {
+                Navigator.of(context).pop();
+                _shareScreen(context);
+              },
+              leading: Icon(
+                Icons.share_outlined,
+                color: switchButton ? Colors.lightGreen : Colors.orange,
+              ),
+              title: Text(
+                'Refer and Earn',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              subtitle: Text(
+                'It pays to have a friend',
+                style: TextStyle(
+                  color: Colors.grey,
+                  fontSize: 10,
+                ),
+              ),
+            ),
             ListTile(
               onTap: () {
                 Navigator.of(context).pop();
