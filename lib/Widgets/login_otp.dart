@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:shop_app/Screens/berfore_signup.dart';
 
 class LoginOtp extends StatefulWidget {
   final String phone;

@@ -173,6 +173,7 @@ class _FruitCategoryScreenState extends State<FruitCategoryScreen> {
                                     true,
                                     "0",
                                     categoryDocs[index]['type'],
+                                    "",
                                     true,
                                   );
                                 },

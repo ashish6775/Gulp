@@ -79,11 +79,11 @@ class _MyWalletScreenState extends State<MyWalletScreen> {
       var response = AllInOneSdk.startTransaction("KGeIop74079861754179",
           orderId, amount.toString(), txnToken, null, false, false);
       response.then((value) async {
-        if (amount >= 2999) {
+        if (amount >= 2499) {
           cashback = 151;
-        } else if (amount >= 1999) {
+        } else if (amount >= 1699) {
           cashback = 101;
-        } else if (amount >= 1199) {
+        } else if (amount >= 999) {
           cashback = 51;
         } else {
           cashback = 0;

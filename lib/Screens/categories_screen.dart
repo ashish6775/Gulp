@@ -60,6 +60,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
         .doc('Branch1')
         .collection('categories')
         .where("type", isEqualTo: "Restaurant")
+        .orderBy('rank')
         .snapshots();
   }
 
@@ -106,6 +107,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                           categoryDocs[index]['categoryOpen'],
                           categoryDocs[index]['off'],
                           categoryDocs[index]['type'],
+                          categoryDocs[index]['from'],
                           restaurantOpen);
                     },
                     padding: EdgeInsets.all(10),

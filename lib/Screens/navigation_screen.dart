@@ -8,7 +8,6 @@ import 'package:package_info/package_info.dart';
 import 'package:provider/provider.dart';
 
 import 'package:shop_app/Providers/cart.dart';
-import 'package:shop_app/Screens/berfore_signup.dart';
 import 'package:shop_app/Screens/cart_screen.dart';
 import 'package:shop_app/Screens/categories_screen.dart';
 import 'package:shop_app/Screens/fruits_category_screen.dart';

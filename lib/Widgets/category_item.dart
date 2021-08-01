@@ -9,9 +9,10 @@ class CategoryItem extends StatelessWidget {
   final String offer;
   final bool restOpen;
   final String type;
+  final String from;
 
   CategoryItem(this.title, this.url, this.categoryOpen, this.offer, this.type,
-      this.restOpen);
+      this.from, this.restOpen);
 
   void selectCategories(BuildContext ctx) {
     Navigator.of(ctx).push(
@@ -109,15 +110,31 @@ class CategoryItem extends StatelessWidget {
               Positioned(
                 bottom: 10,
                 left: 10,
-                child: Text(
-                  title,
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 20,
-                  ),
-                  softWrap: true,
-                  overflow: TextOverflow.fade,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 20,
+                      ),
+                      softWrap: true,
+                      overflow: TextOverflow.fade,
+                    ),
+                    if (from != "")
+                      Text(
+                        from,
+                        style: TextStyle(
+                          fontStyle: FontStyle.italic,
+                          color: Colors.white,
+                          fontSize: 15,
+                        ),
+                        softWrap: true,
+                        overflow: TextOverflow.fade,
+                      ),
+                  ],
                 ),
               ),
             ],
